@@ -13,20 +13,6 @@ The pipeline processes raw multi‑sheet battery test data, extracts HPPC charac
 ✅ Clean Excel outputs
 ✅ Plots & validation reports
 
-📂 Project Structure
-EV_Battery_Project/
-│── sop_estimation_calce_inr18650_20r.py
-│── README.md
-|── Run.bat
-│── Input_Dateset.xlsx
-│── outputs/
-      ├── FINAL_SOP_OUTPUT.xlsx
-      ├── FINAL_SOP_PLOT.png
-      ├── SOP_VALIDATION_OUTPUT.xlsx
-      ├── SOP_VALIDATION_REPORT.txt
-      └── sop_maps.pkl
-
-
 🚀 How to Run
 ✅ 1. Install required Python packages
 Shellpip install numpy pandas matplotlib scipy openpyxlShow more lines

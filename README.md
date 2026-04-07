@@ -22,21 +22,6 @@ The pipeline includes:
 
 The implementation is suitable for **EV/HEV BMS**, modeling & research.
 
----
-
-## 📂 Project Structure
-EV_Battery_Project/
-│── sop_estimation_calce_inr18650_20r.py
-│── README.md
-│── input.xlsx
-│── outputs/
-├── FINAL_SOP_OUTPUT.xlsx
-├── FINAL_SOP_PLOT.png
-├── SOP_VALIDATION_OUTPUT.xlsx
-├── SOP_VALIDATION_REPORT.txt
-└── sop_maps.pkl
-
----
 
 ## 🚀 How to Run
 

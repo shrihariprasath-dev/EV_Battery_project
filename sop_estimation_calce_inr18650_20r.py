@@ -1,3 +1,7 @@
+# =========================================================
+# SOP Estimation for battery cell INR18650_20r 
+# Authour:Shrihariprasath Basuvaiyan
+# =========================================================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,7 +11,7 @@ import os
 import pickle
 
 # =========================================================
-# LOAD & MERGE SHEETS
+# Load Data Sheet and merge it
 # =========================================================
 def load_all_sheets(path):
     print(f"[INFO] Loading workbook: {path}")
@@ -38,7 +42,7 @@ def load_all_sheets(path):
 
 
 # =========================================================
-# COMPUTE SOC
+# Calculate SOC first
 # =========================================================
 def compute_soc(df):
     net = df["Charge_Capacity(Ah)"].fillna(0) - df["Discharge_Capacity(Ah)"].fillna(0)
@@ -48,7 +52,7 @@ def compute_soc(df):
 
 
 # =========================================================
-# RESISTANCE PULSE ESTIMATION
+# Estimate resistance pulse
 # =========================================================
 def estimate_resistance(df, I_rest_thr, I_pulse_thr, window):
     df["is_rest"] = df["Current(A)"].abs() <= I_rest_thr
@@ -83,7 +87,7 @@ def estimate_resistance(df, I_rest_thr, I_pulse_thr, window):
 
 
 # =========================================================
-# BUILD MAPS
+# Build map for validation
 # =========================================================
 def build_maps(pulses, df, R_fallback):
     soc_grid = np.linspace(0, 1, 200)
@@ -103,8 +107,8 @@ def build_maps(pulses, df, R_fallback):
 
 
 # =========================================================
-# COMPUTE SOP
-# =========================================================
+# Calculate SOP
+# ========================================================
 def compute_sop(soc_grid, OCV, R, vmin, vmax, idismax, ichgmax, socmin, socmax):
     I_dis_allowed = (vmin - OCV) / R
     I_chg_allowed = (vmax - OCV) / R
@@ -122,7 +126,7 @@ def compute_sop(soc_grid, OCV, R, vmin, vmax, idismax, ichgmax, socmin, socmax):
 
 
 # =========================================================
-# MAIN + VALIDATION
+#   Main function and validation
 # =========================================================
 def main():
     parser = argparse.ArgumentParser()
@@ -142,7 +146,7 @@ def main():
     R_FALLBACK = 0.04
 
     # =====================================================
-    # SOP ESTIMATION
+    # SOP Estimation
     # =====================================================
     df = load_all_sheets(Path(args.xlsx))
     df = compute_soc(df)
@@ -164,7 +168,7 @@ def main():
     print("Final consolidated SOP file saved → outputs/FINAL_SOP_OUTPUT.xlsx")
 
     # =====================================================
-    # SAVE MAPS FOR VALIDATION
+    # Save map for validation
     # =====================================================
     maps = {"soc": soc_grid, "ocv": OCV_map, "r": R_map}
     with open("outputs/sop_maps.pkl", "wb") as f:
@@ -172,7 +176,7 @@ def main():
     print("Saved SOP maps → outputs/sop_maps.pkl")
 
     # =====================================================
-    # PLOTS
+    # Plots for SOP VS VOLTAGE VS CURRENT VS SOC limits
     # =====================================================
     fig, axes = plt.subplots(3, 1, figsize=(10, 14))
 
@@ -204,7 +208,7 @@ def main():
     print("Plot saved → outputs/FINAL_SOP_PLOT.png")
 
     # =====================================================
-    # VALIDATION MODULE
+    # validation
     # =====================================================
     print("\nStarting SOP Validation...")
 
@@ -232,7 +236,6 @@ def main():
 
     print("\nValidation Error Summary:")
     print(dfv[["Err_Discharge", "Err_Charge"]].describe())
-
 
 if __name__ == "__main__":
     main()

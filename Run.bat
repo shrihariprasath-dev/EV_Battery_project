@@ -34,6 +34,7 @@ echo --------------------------------------------
 echo.
 
 pip install numpy pandas matplotlib openpyxl --quiet
+pip install scipy
 
 IF %ERRORLEVEL% NEQ 0 (
     color 4F
@@ -83,4 +84,3 @@ echo ============================================================
 echo.
 pause
 exit /b 0
-

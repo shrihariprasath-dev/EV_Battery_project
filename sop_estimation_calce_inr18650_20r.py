@@ -1,6 +1,6 @@
 # =========================================================
 # SOP Estimation for battery cell INR18650_20r 
-# Authour:Shrihariprasath Basuvaiyan
+# Author:Shrihariprasath Basuvaiyan
 # =========================================================
 import numpy as np
 import pandas as pd

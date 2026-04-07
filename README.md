@@ -29,6 +29,7 @@ EV_Battery_Project/
 │── sop_estimation_calce_inr18650_20r.py
 │── README.md
 │── input.xlsx
+│── Run.bat
 │── outputs/
 ├── FINAL_SOP_OUTPUT.xlsx
 ├── FINAL_SOP_PLOT.png

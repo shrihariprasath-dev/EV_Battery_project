@@ -25,3 +25,30 @@ The implementation is suitable for **EV/HEV BMS**, modeling & research.
 ---
 
 ## 📂 Project Structure
+EV_Battery_Project/
+│── sop_estimation_calce_inr18650_20r.py
+│── README.md
+│── input.xlsx
+│── outputs/
+├── FINAL_SOP_OUTPUT.xlsx
+├── FINAL_SOP_PLOT.png
+├── SOP_VALIDATION_OUTPUT.xlsx
+├── SOP_VALIDATION_REPORT.txt
+└── sop_maps.pkl
+
+---
+
+## 🚀 How to Run
+
+### ✅ Install dependencies
+pip install numpy pandas matplotlib scipy openpyxl
+####
+Run the SOP script
+python sop_estimation_calce_inr18650_20r.py \
+  --xlsx test_data/input.xlsx \
+  --vmin 3.2 \
+  --vmax 4.2 \
+  --idismax 8 \
+  --ichgmax 4 \
+  --socmin 0.05 \
+  --socmax 0.95

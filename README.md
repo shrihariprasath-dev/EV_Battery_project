@@ -1,7 +1,6 @@
 
 # 🔋 SOP Estimation for INR18650‑20R Battery Cell
 **A Complete State of Power (SOP) Estimation Framework Using HPPC Pulse Resistance, OCV Mapping & Coulomb Counting**  
-**Author:** *Shrihariprasath Basuvaiyan*
 
 ---
 

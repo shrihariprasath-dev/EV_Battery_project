@@ -1,3 +1,4 @@
+
 # 🔋 SOP Estimation for INR18650‑20R Battery Cell
 **A Complete State of Power (SOP) Estimation Framework Using HPPC Pulse Resistance, OCV Mapping & Coulomb Counting**  
 **Author:** *Shrihariprasath Basuvaiyan*
@@ -6,188 +7,236 @@
 
 # 📘 Introduction
 
-This project provides a full **State of Power (SOP)** estimation pipeline for the **INR18650‑20R** lithium‑ion battery cell using experimental test data.  
+This project provides a comprehensive **State of Power (SOP)** estimation pipeline for the **Samsung INR18650‑20R lithium‑ion battery cell** using real experimental data.  
+The methodology is widely used in EV Battery Management Systems (BMS) for:
 
-It is designed for research, BMS modeling, HPPC analysis, and algorithm development.
+✅ Power limit calculation  
+✅ Fast charging control  
+✅ Safety supervision  
+✅ Torque/power capability estimation  
 
-The system computes:
+The system performs:
 
-- ✅ **State of Charge (SOC)** using vectorized Coulomb counting  
-- ✅ **OCV–SOC map** reconstruction  
-- ✅ **Internal resistance (R–SOC map)** using HPPC pulses  
-- ✅ **Charge & Discharge SOP** using physical constraints  
-- ✅ **Validation and plotting** for analysis  
-- ✅ **Excel and PKL exports** for BMS integration  
+- ✅ **State of Charge (SOC)** estimation using vectorized Coulomb counting  
+- ✅ **OCV–SOC mapping** using rest-state voltage data  
+- ✅ **Internal resistance (R–SOC mapping)** using HPPC pulse extraction  
+- ✅ **Charge & Discharge SOP estimation** using physical constraints  
+- ✅ **Plot generation + Excel and PKL exports**  
+- ✅ **Validation with error reporting**  
 
-This README contains:
+This single README includes:
 
 ✅ Full methodology  
-✅ Full workflow diagram  
-✅ Complete explanation of Python implementation  
-✅ Output descriptions  
+✅ Complete workflow diagram  
+✅ All equations  
+✅ Full feature description  
+✅ Output explanation  
 ✅ Folder structure  
 
 All in **one single file**.
 
 ---
-
 # ✅ Key Features
 
-- Auto-detection of all `Channel_*` Excel sheets  
-- Fast vectorized SOC estimation  
-- Robust HPPC pulse resistance extraction  
-- Savitzky–Golay smoothing for clean OCV/R curves  
-- Physically constrained OCV monotonicity  
-- Charge & Discharge SOP estimation  
-- Complete export package (Excel, PNG, PKL)  
-- Validation and error report  
+- Automatically detects all `Channel_*` sheets in Excel input  
+- Merges and cleans cell measurement data  
+- Accurate SOC estimation using Coulomb counting  
+- HPPC pulse-based internal resistance extraction  
+- Savitzky–Golay smoothing for clean OCV and R maps  
+- Monotonic OCV enforcement (physical requirement)  
+- SOP estimation with configurable voltage/current/SOC limits  
+- Detailed SOP validation report  
+- Exports Excel files, PNG plots, and pickled OCV/R maps  
 
 ---
-
 # 📂 Input Excel Format
 
----
+Your Excel workbook must contain:
 
+```
+Channel_1
+Channel_2
+Channel_3
+...
+```
+
+Each sheet must contain the following columns:
+```
+Test_Time(s)
+Current(A)
+Voltage(V)
+Charge_Capacity(Ah)
+Discharge_Capacity(Ah)
+```
+
+---
 # ▶️ Running the Script
 
 ```bash
-python sop_estimation.py \
-    --xlsx data.xlsx \
-    --vmin 2.5 --vmax 4.2 \
-    --idismax 10 --ichgmax 5 \
-    --socmin 0.1 --socmax 0.9
+python sop_estimation.py     --xlsx data.xlsx     --vmin 2.5 --vmax 4.2     --idismax 10 --ichgmax 5     --socmin 0.1 --socmax 0.9
+```
 
-Your Excel workbook must contain sheets like:
+---
+# ✅ CLI Arguments
 
-CLI Arguments
-🧠 Detailed Methodology
-(Fully aligned with the Python code)
-✅ 1. Loading & Merging Input Sheets
-Function: load_all_sheets()
+| Argument | Description |
+|----------|-------------|
+| `--xlsx` | Input Excel file path |
+| `--vmin` | Minimum discharge voltage limit |
+| `--vmax` | Maximum charge voltage limit |
+| `--idismax` | Maximum discharge current |
+| `--ichgmax` | Maximum charge current |
+| `--socmin` | Lower usable SOC boundary |
+| `--socmax` | Upper usable SOC boundary |
 
-Reads all "Channel*" sheets from an Excel file
-Converts numeric columns
-Removes invalid rows
-Sorts by time
-Adds metadata (Sheet, Sample_ID)
-Produces a complete merged dataset
+---
+# 📊 Full SOP Estimation Workflow
 
+```mermaid
+flowchart TD
 
-✅ 2. SOC Estimation (Coulomb Counting)
-Function: compute_soc()
-Uses:
-SOC=SOC0−∫I(t)⋅ηCnominaldtSOC = SOC_0 - \int \frac{I(t) \cdot \eta}{C_{nominal}} dtSOC=SOC0​−∫Cnominal​I(t)⋅η​dt
-Where:
+A([Start]) --> B[Read CLI Arguments<br>--xlsx, vmin, vmax, idismax, ichgmax, socmin, socmax]
 
-Charge efficiency = 0.99
-Discharge efficiency = 1.00
-dt computed from timestamp difference
-SOC clipped to [0, 1]
+B --> C[Load Excel Sheets<br>Detect 'Channel*' sheets<br>Merge & clean data]
 
-This produces a continuous and stable SOC trace.
+C --> D[Compute SOC<br>Vectorized Coulomb Counting<br>η_chg & η_dis efficiencies]
 
-✅ 3. HPPC Resistance Extraction
-Function: estimate_resistance()
-Steps:
+D --> E[Extract HPPC Pulse Resistance<br>Detect rest & pulse events<br>Compute R = ΔV / ΔI]
 
-Identify rest regions (|I| < 0.02 A)
-Identify pulse events (|I| > 0.5 A)
-Match each pulse with nearest preceding rest point
-Compute resistance:
+E --> F[Build OCV & R Maps<br>SOC binning<br>Median filtering<br>Savgol smoothing<br>Monotonic enforcement]
 
-R=Vpulse−VrestIpulseR = \frac{V_{pulse} - V_{rest}}{I_{pulse}}R=Ipulse​Vpulse​−Vrest​​
+F --> G[Compute SOP Maps<br>Charge + Discharge SOP<br>Apply voltage/current/SOC limits]
 
-Reject unrealistic values (0 < R < 0.5 Ω)
+G --> H[Interpolate Back to Dataset<br>SOP at every timestamp]
 
-Output columns:
+H --> I[Export FINAL_SOP_OUTPUT.xlsx<br>Complete SOP table]
+
+I --> J[Generate SOP Plots<br>Voltage, Current, SOC curves<br>Save FINAL_SOP_PLOT.png]
+
+J --> K([End])
+```
+
+---
+# 🧠 Detailed Methodology (Aligned with Python Script)
+
+## ✅ 1. Loading & Merging Input Sheets
+- Loads all sheets with prefix `Channel*`  
+- Converts numeric columns  
+- Removes invalid values  
+- Sorts by timestamp  
+- Adds metadata (`Sheet`, `Sample_ID`)  
+
+## ✅ 2. SOC Estimation (Coulomb Counting)
+Equation:
+
+\[
+SOC = SOC_0 - \int rac{I(t) \cdot \eta}{C_{nominal}} dt
+\]
+
+- `I_raw = -Current(A)` ensures discharge is negative  
+- Charge efficiency = 0.99  
+- Discharge efficiency = 1.00  
+- Output SOC is clipped between 0 and 1  
+
+## ✅ 3. HPPC Pulse Resistance Extraction
+- Detect rest intervals (`|I| < 0.02A`)  
+- Detect pulse events (`|I| > 0.5A`)  
+- Match pulse → nearest preceding rest point  
+- Resistance:
+
+\[
+R = rac{V_{pulse} - V_{rest}}{I_{pulse}}
+\]
+
+- Reject unrealistic values (`0 < R < 0.5Ω`)  
+
+Outputs:
+```
 SOC
 OCV
 R
+```
 
+## ✅ 4. OCV–SOC & R–SOC Map Construction
+- SOC binning (100 bins)  
+- Median filtering  
+- 200-point interpolation  
+- Savitzky–Golay smoothing  
+- Enforce monotonic OCV:
 
-✅ 4. Building OCV–SOC and R–SOC Maps
-Function: build_maps()
-Processing includes:
+\[
+OCV[i] = \max(OCV[0:i])
+\]
 
-Binning pulses into 100 SOC bands
-Median filtering to remove outliers
-200‑point interpolation
-Savitzky–Golay smoothing
-Enforcing monotonic OCV:
-
-OCV[i]=max⁡(OCV[0:i])OCV[i] = \max(OCV[0:i])OCV[i]=max(OCV[0:i])
-
-Clamping R to prevent division-by-zero
+- Clamp R to avoid division by zero  
 
 Outputs:
+- `soc_grid`
+- `OCV_map`
+- `R_map`
 
-soc_grid (200 points)
-OCV_map
-R_map
+## ✅ 5. SOP Calculation
+### Discharge SOP
+\[
+I_{dis} = rac{OCV - V_{min}}{R}
+\]
+\[
+P_{dis} = V_{min} \cdot I_{dis}
+\]
 
+### Charge SOP
+\[
+I_{chg} = rac{V_{max} - OCV}{R}
+\]
+\[
+P_{chg} = V_{max} \cdot I_{chg}
+\]
 
-✅ 5. SOP Calculation
-Function: compute_sop()
-Discharge SOP:
-Idis=OCV−VminRI_{dis} = \frac{OCV - V_{min}}{R}Idis​=ROCV−Vmin​​
-Pdis=Vmin⋅IdisP_{dis} = V_{min} \cdot I_{dis}Pdis​=Vmin​⋅Idis​
-Charge SOP:
-Ichg=Vmax−OCVRI_{chg} = \frac{V_{max} - OCV}{R}Ichg​=RVmax​−OCV​
-Pchg=Vmax⋅IchgP_{chg} = V_{max} \cdot I_{chg}Pchg​=Vmax​⋅Ichg​
-Constraints applied:
+### Enforced limits:
+- Voltage limits  
+- Current limits  
+- SOC window  
+- No negative currents  
 
-Voltage limits
-Current limits
-SOC window
-Non-negative currents
-
-
-✅ 6. Interpolating SOP Back to Dataset
-Linear interpolation maps the computed SOP curves:
+## ✅ 6. Interpolating SOP Back to Full Dataset
+Adds new columns:
+```
 SOP_Discharge(W)
 SOP_Charge(W)
+```
 
-onto each time-indexed dataset row.
+## ✅ 7. Output Exports
+Saved under `outputs/`:
 
-✅ 7. Output File Generation
-Outputs stored under:
-outputs/
-
-✅ FINAL_SOP_OUTPUT.xlsx
-Contains:
-
-Voltage
-Current
-SOC
-SOP_Discharge
-SOP_Charge
-
-
-✅ sop_maps.pkl
-Serialized dictionary:
-Python{  "soc": soc_grid,  "ocv": OCV_map,  "r": R_map}Show more lines
-
-✅ FINAL_SOP_PLOT.png
+### ✅ `FINAL_SOP_OUTPUT.xlsx`
 Includes:
+- Voltage  
+- Current  
+- SOC  
+- SOP_Discharge(W)  
+- SOP_Charge(W)  
 
-SOP vs Voltage
-SOP vs Current
-SOP vs SOC
+### ✅ `sop_maps.pkl`
+```python
+{
+  "soc": soc_grid,
+  "ocv": OCV_map,
+  "r": R_map
+}
+```
 
+### ✅ `FINAL_SOP_PLOT.png`
+Contains: SOP vs Voltage, Current, SOC
 
-✅ SOP_VALIDATION_OUTPUT.xlsx
-Computed vs expected SOP values.
+### ✅ `SOP_VALIDATION_OUTPUT.xlsx`
+SOP recomputed for error comparison
 
-✅ SOP_VALIDATION_REPORT.txt
-Contains:
+### ✅ `SOP_VALIDATION_REPORT.txt`
+Statistics (RMSE, MAE, bias)
 
-RMSE
-MAE
-Bias
-Summary statistics
-
-
-📁 Folder Structure
+---
+# 📁 Folder Structure
+```
 project/
 │── sop_estimation.py
 │── data.xlsx
@@ -198,12 +247,16 @@ project/
 │   │── SOP_VALIDATION_REPORT.txt
 │   │── sop_maps.pkl
 │── README.md
+```
 
+---
+# ✅ Future Enhancements
+- Temperature‑dependent mapping  
+- ECM modeling (1RC/2RC)  
+- EKF/UKF SOC estimation  
+- Real-time BMS firmware integration  
+- Automated HPPC pulse detection  
 
-✅ Future Enhancements
-
-Temperature‑dependent OCV/R maps
-Full ECM (1RC/2RC) modeling
-EKF/UKF‑based SOC estimation
-BMS firmware integration
-HPPC automatic classification
+---
+# 📜 License
+For **research and educational use only**.

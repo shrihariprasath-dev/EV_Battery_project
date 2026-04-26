@@ -223,21 +223,32 @@ def main():
     # =====================================================
     fig, axes = plt.subplots(3, 1, figsize=(10, 14))
 
+    # SOP vs Voltage
     axes[0].plot(OCV_map, P_dis, label="Discharge")
     axes[0].plot(OCV_map, P_chg, label="Charge")
     axes[0].set_title("SOP vs Voltage")
+    axes[0].set_xlabel("Voltage (V)")
+    axes[0].set_ylabel("Power (W)")
     axes[0].grid(True)
     axes[0].legend()
 
-    axes[1].plot((OCV_map - args.vmin) / R_map, P_dis)
-    axes[1].plot((args.vmax - OCV_map) / R_map, P_chg)
+    # SOP vs Current
+    axes[1].plot((OCV_map - args.vmin) / R_map, P_dis, label="Discharge")
+    axes[1].plot((args.vmax - OCV_map) / R_map, P_chg, label="Charge")
     axes[1].set_title("SOP vs Current")
+    axes[1].set_xlabel("Current (A)")
+    axes[1].set_ylabel("Power (W)")
     axes[1].grid(True)
+    axes[1].legend()
 
-    axes[2].plot(soc_grid, P_dis)
-    axes[2].plot(soc_grid, P_chg)
+    # SOP vs SOC
+    axes[2].plot(soc_grid, P_dis, label="Discharge")
+    axes[2].plot(soc_grid, P_chg, label="Charge")
     axes[2].set_title("SOP vs SOC")
+    axes[2].set_xlabel("State of Charge (SOC, fraction)")
+    axes[2].set_ylabel("Power (W)")
     axes[2].grid(True)
+    axes[2].legend()
 
     plt.tight_layout()
     plt.savefig("outputs/FINAL_SOP_PLOT.png", dpi=300)
